@@ -12,7 +12,7 @@
   "author": "jeremaihloo <jeremaihloo1024@gmail.com>",
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/jeremaihloo/getdemos-js"
   },
   "license": "MIT",
   "engines": {
@@ -120,7 +120,6 @@
   "dependencies": {
     "axios": "^0.18.0",
     "compare-versions": "^3.4.0",
-    "query-string": "^6.6.0",
-    "react-native-storage": "^1.0.1"
+    "query-string": "^6.6.0"
   }
 }
