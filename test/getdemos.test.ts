@@ -1,5 +1,6 @@
-import GetDemos, { AppQuery, AppQueryParam } from '../src/getdemos'
+import 'jest-localstorage-mock'
 
+import GetDemos, { AppQuery, AppQueryParam, GETDEMOS_TOKEN } from '../src/getdemos'
 /**
  * Dummy test
  */
@@ -8,9 +9,9 @@ describe('GetDemos test', () => {
     expect(true).toBeTruthy()
   })
 
-  // it('DummyClass is instantiable', () => {
-  //   expect(new GetDemos(null)).toBeInstanceOf(GetDemos)
-  // })
+  it('GetDemos is instantiable', () => {
+    expect(new GetDemos(localStorage)).toBeInstanceOf(GetDemos)
+  })
 
   it('AppQuery toString', () => {
     expect(new AppQuery().toString()).toEqual('pageIndex=0&pageSize=10')
@@ -18,5 +19,14 @@ describe('GetDemos test', () => {
 
   it('AppQueryParam toString', () => {
     expect(new AppQueryParam(1, 'getdemos').toString()).toEqual('appId=1&name=getdemos')
+  })
+
+  const engine = new GetDemos(localStorage)
+
+  it('doLogin successful', () => {
+    engine.doLogin({ userName: 'admin', password: 'admin' }).then(res => {
+      expect(res.data.ok).toBeTruthy()
+      expect(res.data.data).toEqual(localStorage.__STORE__[GETDEMOS_TOKEN])
+    })
   })
 })
