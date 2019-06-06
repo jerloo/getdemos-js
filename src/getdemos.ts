@@ -1,6 +1,7 @@
 /* eslint-disable no-undef */
 import axios, { AxiosInstance } from 'axios'
-import qs from 'querystring'
+import { stringify } from 'query-string'
+import compareVersions from 'compare-versions'
 
 export interface ApiMessage<T = any> {
   ok: boolean
@@ -37,7 +38,7 @@ export class AppQuery {
   pageSize: number = 10
 
   toString(): string {
-    return qs.stringify(this)
+    return stringify(this)
   }
 }
 
@@ -45,8 +46,13 @@ export class AppQueryParam {
   appId?: number
   name?: string
 
+  constructor(appId?: number, name?: string) {
+    this.appId = appId
+    this.name = name
+  }
+
   toString(): string {
-    return qs.stringify(this)
+    return stringify(this)
   }
 }
 
@@ -55,6 +61,11 @@ export interface Invitation {
   code: string
   userId: number
   appId: number
+}
+
+export interface CheckUpdateResult {
+  latest?: boolean
+  release?: Release
 }
 
 export default class GetDemos {
@@ -176,7 +187,24 @@ export default class GetDemos {
    * 创建APP
    * @param payload APP详情
    */
-  async addApp(payload: App) {
+  async createApp(payload: App) {
     return await this.client.post<ApiMessage<App>>('/api/apps', payload)
+  }
+
+  /**
+   * 检查更新
+   * @param versionCode 版本构建代码
+   * @param versionName 版本号
+   */
+  async checkUpdate(versionName: string, versionCode?: string): Promise<CheckUpdateResult> {
+    const latestRelease = await this.getAppLatestRelease({})
+    const result: CheckUpdateResult = {}
+    if (compareVersions(latestRelease.data.data.version, versionName) === 1) {
+      result.latest = false
+      result.release = latestRelease.data.data
+    } else {
+      result.latest = true
+    }
+    return Promise.resolve(result)
   }
 }

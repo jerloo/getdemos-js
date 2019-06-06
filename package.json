@@ -1,5 +1,5 @@
 {
-  "name": "getdemos",
+  "name": "rgetdemos",
   "version": "0.0.0",
   "description": "",
   "keywords": [],
@@ -119,6 +119,8 @@
   },
   "dependencies": {
     "axios": "^0.18.0",
+    "compare-versions": "^3.4.0",
+    "query-string": "^6.6.0",
     "react-native-storage": "^1.0.1"
   }
 }
