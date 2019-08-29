@@ -1,0 +1,16 @@
+{
+  "include": ["../GetDemoApi/GetDemoApi/Models/*.cs"],
+  "exclude": [
+    "../GetDemoApi/GetDemoApi/Models/DemosDbContext.cs",
+    "../GetDemoApi/GetDemoApi/Models/VersionJsonConverter.cs"
+  ],
+  "output": "./src/getdemos.models.ts",
+  "camelCase": true,
+  "camelCaseEnums": false,
+  "numericEnums": false,
+  "stringLiteralTypesInsteadOfEnums": false,
+  "customTypeTranslations": {
+    "AppVersion": "string",
+    "List<T>": "ArrayList<T>"
+  }
+}

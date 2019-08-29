@@ -2325,6 +2325,11 @@ crypto-random-string@^1.0.0:
   resolved "https://registry.npm.taobao.org/crypto-random-string/download/crypto-random-string-1.0.0.tgz#a230f64f568310e1498009940790ec99545bca7e"
   integrity sha1-ojD2T1aDEOFJgAmUB5DsmVRbyn4=
 
+csharp-models-to-typescript@^0.15.0:
+  version "0.15.0"
+  resolved "https://registry.npm.taobao.org/csharp-models-to-typescript/download/csharp-models-to-typescript-0.15.0.tgz#2e93b426f588e29055247a7b75141bc1187bc2ca"
+  integrity sha1-LpO0JvWI4pBVJHp7dRQbwRh7wso=
+
 cssom@0.3.x, "cssom@>= 0.3.2 < 0.4.0":
   version "0.3.6"
   resolved "https://registry.npm.taobao.org/cssom/download/cssom-0.3.6.tgz#f85206cee04efa841f3c5982a74ba96ab20d65ad"

@@ -10,7 +10,15 @@ describe('GetDemos test', () => {
   })
 
   it('GetDemos is instantiable', () => {
-    expect(new GetDemos(localStorage)).toBeInstanceOf(GetDemos)
+    expect(
+      new GetDemos({
+        debug: true,
+        storage: localStorage,
+        axiosConfigs: {
+          baseURL: 'https://getdemos.pro'
+        }
+      })
+    ).toBeInstanceOf(GetDemos)
   })
 
   it('AppQuery toString', () => {
@@ -21,10 +29,10 @@ describe('GetDemos test', () => {
     expect(new AppQueryParam(1, 'getdemos').toString()).toEqual('appId=1&name=getdemos')
   })
 
-  const engine = new GetDemos(localStorage)
+  const engine = new GetDemos({ debug: true, storage: localStorage })
 
   it('doLogin successful', () => {
-    engine.doLogin({ userName: 'admin', password: 'admin' }).then(res => {
+    engine.doLogin({ username: 'admin', password: 'admin' }).then(res => {
       expect(res.data.ok).toBeTruthy()
       expect(res.data.data).toEqual(localStorage.__STORE__[GETDEMOS_TOKEN])
     })

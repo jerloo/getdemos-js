@@ -1,36 +1,15 @@
 /* eslint-disable no-undef */
-import axios, { AxiosInstance } from 'axios'
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
 import { stringify } from 'query-string'
 import compareVersions from 'compare-versions'
+import { LoginModel, AppRelease, App, Article, Tag, Pagination } from './getdemos.models'
+import { Query, CheckUpdateResult } from './api.models.t'
 
 export interface ApiMessage<T = any> {
   ok: boolean
   code: number
   msg: string
   data: T
-}
-
-export interface LoginModel {
-  userName: string
-  password: string
-}
-
-export interface App {
-  id: number
-  name: string
-  title: string
-  description: string
-  icon: string
-  packageName: string
-}
-
-export interface Release {
-  id: number
-  appId: number
-  notes: string
-  version: string
-  visible: boolean
-  apkUrl: string
 }
 
 export class AppQuery {
@@ -63,43 +42,54 @@ export interface Invitation {
   appId: number
 }
 
-export interface CheckUpdateResult {
-  latest?: boolean
-  release?: Release
+export interface GetDemosConfigOpts {
+  debug?: boolean
+  storage?: DefaultStorage
+  axiosConfigs?: AxiosRequestConfig
 }
 
 export const GETDEMOS_TOKEN = 'getdemos-token'
 
+export class DefaultStorage {
+  get = async () => {
+    return localStorage.getItem(GETDEMOS_TOKEN)
+  }
+
+  set = async (token: string) => {
+    return localStorage.setItem(GETDEMOS_TOKEN, token)
+  }
+}
 export default class GetDemos {
   client: AxiosInstance
-  storage: Storage
+  storage: DefaultStorage
 
-  constructor(storage: Storage) {
-    this.client = axios.create({
-      baseURL: 'https://getdemos.pro'
-    })
+  constructor(opts: GetDemosConfigOpts) {
+    this.client = axios.create(opts.axiosConfigs)
 
-    this.storage = storage
+    this.storage = opts.storage || new DefaultStorage()
 
     this.client.interceptors.request.use(
       async configs => {
-        const token = storage.getItem(GETDEMOS_TOKEN)
-        if (token) {
+        const token = await this.storage.get()
+        if (token !== null) {
           configs.headers.Authorization = `Bearer ${token}`
         }
-        // console.log('[request]', configs)
+        opts.debug && console.log('[request] ', configs)
         return configs
       },
       error => {
         // Do something with request error
-        return Promise.reject(error)
+        opts.debug && console.log('[request:error] ', error)
+        return Promise.reject({
+          ok: false,
+          msg: error
+        })
       }
     )
 
     this.client.interceptors.response.use(
       response => {
-        // console.log('[response]', response)
-        // console.log('status', response.status)
+        opts.debug && console.log('[response] ', response)
         switch (response.status) {
           case 500:
             return Promise.reject({
@@ -115,6 +105,7 @@ export default class GetDemos {
       },
       error => {
         // Do something with request error
+        opts.debug && console.log('[responnse:error] ', error)
         return Promise.reject(error.response)
       }
     )
@@ -127,7 +118,7 @@ export default class GetDemos {
   async doLogin(payload: LoginModel) {
     const res = await this.client.post<ApiMessage<string>>('/api/auth', payload)
     if (res.data.ok) {
-      this.storage.setItem(GETDEMOS_TOKEN, res.data.data)
+      await this.storage.set(res.data.data)
     }
     return res
   }
@@ -153,7 +144,7 @@ export default class GetDemos {
    * @param appQueryParams APP查询参数
    */
   async getAppLatestRelease(appQueryParams: AppQueryParam) {
-    return this.client.get<ApiMessage<Release>>(
+    return this.client.get<ApiMessage<AppRelease>>(
       `/api/apps/releases/latest${appQueryParams.toString()}`
     )
   }
@@ -163,7 +154,7 @@ export default class GetDemos {
    * @param appQueryParams APP查询参数
    */
   async getAllAppReleases(appQueryParams: AppQueryParam) {
-    return this.client.get<ApiMessage<Release[]>>(
+    return this.client.get<ApiMessage<AppRelease[]>>(
       `/api/apps/releases?id=${appQueryParams.toString()}`
     )
   }
@@ -172,8 +163,8 @@ export default class GetDemos {
    * 发布一个新版本
    * @param payload 发布版本信息
    */
-  async releaseNewVersion(payload: Release) {
-    return this.client.post<ApiMessage<Release>>('/api/apps/releases', payload)
+  async releaseNewVersion(payload: AppRelease) {
+    return this.client.post<ApiMessage<AppRelease>>('/api/apps/releases', payload)
   }
 
   /**
@@ -215,5 +206,29 @@ export default class GetDemos {
       result.latest = true
     }
     return Promise.resolve(result)
+  }
+
+  getArticle = (id: number) => {
+    return this.client.get<ApiMessage<Article>>(`/api/articles/${id}`)
+  }
+
+  getArticles = (query: Query) => {
+    return this.client.get<ApiMessage<Pagination<Article>>>(`/api/articles?${query.toString()}`)
+  }
+
+  createArticle = (article: Article) => {
+    return this.client.post(`/api/articles`, article)
+  }
+
+  updateArticle = (id: number, article: Article) => {
+    return this.client.put(`/api/articles?id=${id}`, article)
+  }
+
+  removeArticleById = (id: number) => {
+    return this.client.delete(`/api/articles/${id}`)
+  }
+
+  getTags = () => {
+    return this.client.get<ApiMessage<Tag>>(`/api/tags`)
   }
 }
